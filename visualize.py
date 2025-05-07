@@ -1,9 +1,22 @@
 import numpy as np
 import plotly.graph_objects as go
-import pickle
+import pickle, argparse, json
+
+
+parser = argparse.ArgumentParser(description='Visualize the Handwriting Data (X, Y, Force)')
+parser.add_argument('dataset', type=str, default='class_a', help='Dataset name (e.g class_a, class_b)')
+parser.add_argument('index', type=int, default=0, help='Index of the sample to visualize')
+
+args = parser.parse_args()
+
+with open(args.dataset + ".json", 'r') as f:
+    data = json.load(f)
+
+with open(args.dataset + ".pickle", 'wb') as f:
+    pickle.dump(data, f)
 
 # Load the data from the pickle dataset
-data = np.load('/Users/haro/works/handwriting_authenticate/data/signature_data.pickle', allow_pickle=True)
+data = np.load(args.dataset + ".pickle", allow_pickle=True)
 
 Samples = []
 
@@ -23,7 +36,9 @@ for i, sample in enumerate(data['samples']):
     Samples.append([x, y, force])
 
 
-visualize_num = int(input(f"Input the index of the sample you want to visualize (0-{len(data['samples'])-1}): "))
+visualize_num = args.index
+if visualize_num >= len(Samples):
+    raise ValueError(f"Index {visualize_num} is out of range for the dataset with {len(Samples)} samples.")
 
 
 # Plotting the points

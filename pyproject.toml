@@ -3,11 +3,17 @@ name = "auth"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
+    "liquidnet>=0.0.5",
+    "ncps>=1.0.1",
     "numpy>=2.2.5",
     "plotly>=6.0.1",
+    "pytorch-lightning>=2.5.1.post0",
     "scipy>=1.15.2",
+    "standard-imghdr>=3.13.0",
+    "tensorboard>=2.19.0",
     "torch>=2.7.0",
     "torchio>=0.20.8",
+    "torchmetrics>=1.7.1",
 ]
