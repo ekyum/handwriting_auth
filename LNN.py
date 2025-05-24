@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 from scipy import signal
 from torchmetrics import Accuracy
 import pytorch_lightning as pl
-
+from torchinfo import summary
 
 """
 Data Augmentation Model
@@ -49,8 +49,8 @@ class SignatureDataset(Dataset):
                         point['x'],
                         point['y'],
                         point['force'],
-                        #point['altitude'],
-                        #point['azimuth'],
+                        point['altitude'],
+                        point['azimuth'],
                         global_time + point['timeOffset'],
                     ]
                     sequence.append(features)
@@ -92,7 +92,7 @@ class SignatureDataset(Dataset):
 # Liquid Neural Network.
 
 class HandwritingLNNAttention(nn.Module):
-    def __init__(self, num_classes, seq_length=96, input_size=4):
+    def __init__(self, num_classes, seq_length=96, input_size=6):
         super().__init__()
         self.normalize = nn.LayerNorm(input_size)
 
@@ -125,10 +125,10 @@ class HandwritingLNNAttention(nn.Module):
         return self.classifier(context)
 
 class LitHandwritingModel(pl.LightningModule):
-    def __init__(self, num_classes, learning_rate=1e-3):
+    def __init__(self, num_classes, input_size, learning_rate=1e-3):
         super().__init__()
         
-        self.model = HandwritingLNNAttention(num_classes)
+        self.model = HandwritingLNNAttention(num_classes, input_size=6)
         self.criterion = nn.CrossEntropyLoss()
         self.accuracy = Accuracy(task='multiclass', num_classes=num_classes)
         self.lr = learning_rate
@@ -167,10 +167,10 @@ if __name__ == "__main__":
     # Model Test
 
     # Hyperparameters
-    batch_size = 32
+    batch_size = 64
     num_classes = 2
     seq_length = 96
-    input_size = 4
+    input_size = 6
 
     Dataset_class_a = SignatureDataset('/Users/haro/works/handwriting_authenticate/data/class_A.json', 0)
     Dataset_class_b = SignatureDataset('/Users/haro/works/handwriting_authenticate/data/class_A_b.json', 1)
@@ -184,10 +184,14 @@ if __name__ == "__main__":
       # Load Dataset
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-
+  
     # Initialize model and trainer
-    model = LitHandwritingModel(num_classes=num_classes)
-    trainer = pl.Trainer(max_epochs=10, accelerator='mps', devices=1, logger=True)
+    model = LitHandwritingModel(num_classes=num_classes, input_size=input_size)
+    trainer = pl.Trainer(max_epochs=500, accelerator='mps', devices=1, logger=True)
     
+    summary(model, input_size=(batch_size, seq_length, input_size))
+
     # Train the model
     trainer.fit(model, train_loader, val_loader)
+
+    

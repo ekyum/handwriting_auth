@@ -14,6 +14,7 @@ dependencies = [
     "standard-imghdr>=3.13.0",
     "tensorboard>=2.19.0",
     "torch>=2.7.0",
+    "torchinfo>=1.8.0",
     "torchio>=0.20.8",
     "torchmetrics>=1.7.1",
 ]
